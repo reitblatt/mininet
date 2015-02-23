@@ -1059,7 +1059,7 @@ class OVSSwitch( Switch ):
 
     def __init__( self, name, failMode='secure', datapath='kernel',
                   inband=False, protocols=None,
-                  reconnectms=1000, stp=False, batch=False, **params ):
+                  reconnectms=1000, inactivity_timeout=5000, stp=False, batch=False, **params ):
         """name: name for switch
            failMode: controller loss behavior (secure|open)
            datapath: userspace or kernel mode (kernel|user)
@@ -1075,6 +1075,7 @@ class OVSSwitch( Switch ):
         self.inband = inband
         self.protocols = protocols
         self.reconnectms = reconnectms
+        self.inactivity_timeout = inactivity_timeout
         self.stp = stp
         self._uuids = []  # controller UUIDs
         self.batch = batch
@@ -1207,6 +1208,8 @@ class OVSSwitch( Switch ):
         ccmd = '-- --id=@%s create Controller target=\\"%s\\"'
         if self.reconnectms:
             ccmd += ' max_backoff=%d' % self.reconnectms
+        if self.inactivity_timeout:
+            ccmd += ' inactivity_probe=%d' % self.inactivity_timeout
         cargs = ' '.join( ccmd % ( name, target )
                           for name, target in clist )
         # Controller ID list
